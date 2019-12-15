@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup Hub
+      uses: Geertvdc/setup-hub@master
+    - name: Upgrade gems & node modules
+      run: |
+        bundle update
+        yarn update
+    - name: Create new pull-request
+      env:
+        GITHUB_USER: ${{ secrets.GITHUB_USER }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        BRANCH_NAME="upgrade-$(date +%s)"
+        git checkout -b $BRANCH_NAME
+        git commit -am "Upgrade gems"
+        git push origin $BRANCH_NAME
+        hub pull-request
